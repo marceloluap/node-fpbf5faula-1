@@ -1,3 +1,4 @@
+import { table } from 'console';
 import { Router, Request, Response, NextFunction } from 'express';
 //forma de configurar rotas no express
 
