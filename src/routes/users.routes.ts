@@ -25,4 +25,22 @@ usersRoute.post('/users', (req: Request, res: Response, next: NextFunction) => {
   res.status(201).send(newuser);
 });
 
+usersRoute.put(
+  '/users/:uuid',
+  (req: Request<{ uuid: String }>, res: Response, next: NextFunction) => {
+    const uuid = req.params.uuid;
+    const modifieduser = req.body;
+    modifieduser.uuid = uuid;
+    res.status(200).send(modifieduser);
+  }
+);
+
+usersRoute.delete(
+  '/users/:uuid',
+  (req: Request<{ uuid: String }>, res: Response, next: NextFunction) => {
+    const uuid = req.params.uuid;
+    res.sendStatus(200);
+  }
+);
+
 export default usersRoute;

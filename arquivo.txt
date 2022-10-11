@@ -1,0 +1,347 @@
+https://docs.google.com/document/d/1NPRmOKKumrzCtsFpADci-KYlyPTrN-m3jmlqS32vkiw/edit
+
+
+
+First Step - Inicializar aplicativo no stackblitz com node.
+	
+1 - Criar no package.json um script de start: “start”: “node ./index.js”,
+2 - npm install typescript
+3 - tsc  - - init
+code gerado:
+/* Visit https://aka.ms/tsconfig to read more about this file */
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  }
+}
+ 
+
+Mudar para isso:
+/* Visit https://aka.ms/tsconfig to read more about this file */
+{
+  "compilerOptions": {
+    "target": "es2019",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "rootDir": "src",
+    "typeRoots": ["./src/@types", "./node_modules/@types"],
+    "outDir": "./dist",
+    "removeComments": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  }
+}
+ 
+
+Criar pasta src
+Criar @types dentro de src   
+Criar pasta dist -> pasta responsável pela build do projeto
+
+4 - Converter o index.js para index.ts e colocar dentro da pasta src
+5 - mudar no package json e adicionar a pasta ./dist/index.js	
+{
+  "name": "node-starter",
+  "version": "0.0.0",
+  "main": "./dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./"
+  },
+  "dependencies": {
+    "typescript": "^4.8.3"
+  }
+}
+ 
+
+6 - instalar biblioteca para transpilação
+npm install - - save-dev typescript
+npm install - - save-dev @types/node - autocomplete para bibliotecas padrão do node
+
+7 - no package json, criar comando de build: “build”: “tsc -p .”
+
+{
+  "name": "node-starter",
+  "version": "0.0.0",
+  "main": "./dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./",
+    "build": "tsc -p ."
+  },
+  "dependencies": {
+    "typescript": "^4.8.3"
+  },
+  "devDependencies": {
+    "@types/node": "^18.7.18"
+  }
+}
+ 
+
+npm run build
+cria o arquivo na pasta dist, index.js
+
+CRIANDO SERVIDOR MÍNIMO COM EXPRESS
+npm install - -save express
+npm install - - save-dev @types/express 
+
+import express, { Request, Response, NextFunction } from 'express';
+ 
+const app = express();
+ 
+app.get('/status', (req: Request, res: Response, next: NextFunction) => {
+  res.status(200).send({ foo: 'bar' });
+});
+ 
+app.listen(3000, () => {
+  console.log('Estou funcionando');
+});
+ 
+
+npm run build
+node ./dist/index.js
+
+AUTOMATIZANDO O SERVIDOR
+
+npm install - -save-dev ts-node-dev 
+
+criando script dev no package.json “dev”: “ts-node-dev --respawn --transpile-only --ignore-watch node_modules --no-notify src/index.ts”
+
+package.json
+{
+  "name": "node-starter",
+  "version": "0.0.0",
+  "main": "./dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./",
+    "build": "tsc -p .",
+    "dev": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules --no-notify src/index.ts"
+  },
+  "dependencies": {
+    "express": "^4.18.1",
+    "typescript": "^4.8.3"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.14",
+    "@types/node": "^18.7.18",
+    "ts-node-dev": "^2.0.0"
+  }
+}
+ 
+
+
+
+DESENVOLVIMENTO DE CRUD
+
+-criar nova pasta dentro da pasta src, com nome routes
+-criar arquivo users.routes.ts 
+import { Router, Request, Response, NextFunction } from 'express';
+//forma de configurar rotas no express
+ 
+const usersRoute = Router();
+ 
+usersRoute.get('/users', (req: Request, res: Response, next: NextFunction) => {
+  const users = [{ userName: 'Fabricio' }];
+  res.status(200).send({ users });
+});
+ 
+export default usersRoute;
+ 
+
+
+Importar para dentro do arquivo index.ts 
+não esqueça de dar o npm run dev
+
+import express, { Request, Response, NextFunction } from 'express';
+import usersRoute from './routes/users.routes';
+ 
+const app = express();
+ 
+app.use(usersRoute);
+ 
+app.get('/status', (req: Request, res: Response, next: NextFunction) => {
+  res.status(200).send({ foo: 'bar' });
+});
+ 
+app.listen(3000, () => {
+  console.log('Estou funcionando');
+});
+ 
+
+
+QUERY STRING dif QUERY PARAMS (ESTUDAR)
+
+CRIANDO ROTA PARA USUÁRIO PELO UUID
+
+import { Router, Request, Response, NextFunction } from 'express';
+//forma de configurar rotas no express
+ 
+const usersRoute = Router();
+ 
+usersRoute.get('/users', (req: Request, res: Response, next: NextFunction) => {
+  const users = [{ userName: 'Fabricio' }];
+  res.status(200).send({ users });
+});
+ 
+usersRoute.get(
+  '/users/:uuid',
+  (req: Request<{ uuid: String }>, res: Response, next: NextFunction) => {
+    const uuid = req.params.uuid;
+    res.status(200).send({ uuid });
+  }
+);
+ 
+export default usersRoute;
+ 
+
+
+FACILITANDO O USO DE STATUS CODE NO SEU CÓDIGO
+
+npm install - -save http-status-codes
+
+usersrouters.ts
+import { Router, Request, Response, NextFunction } from 'express';
+//forma de configurar rotas no express
+import { StatusCodes } from 'http-status-codes';
+ 
+ 
+const usersRoute = Router();
+ 
+usersRoute.get('/users', (req: Request, res: Response, next: NextFunction) => {
+  const users = [{ userName: 'Fabricio' }];
+  res.status(StatusCodes.OK).send({ users });
+});
+ 
+usersRoute.get(
+  '/users/:uuid',
+  (req: Request<{ uuid: String }>, res: Response, next: NextFunction) => {
+    const uuid = req.params.uuid;
+    res.status(StatusCodes.OK).send({ uuid });
+  }
+);
+ 
+export default usersRoute;
+ 
+
+
+Criando o POST
+
+Código do userroutes.ts
+
+
+
+código do index.ts para interpretar os json
+app.use(express.json());
+
+import { Router, Request, Response, NextFunction } from 'express';
+//import { StatusCodes } from 'http-status-code';
+//forma de configurar rotas no express
+ 
+const usersRoute = Router();
+ 
+usersRoute.get('/users', (req: Request, res: Response, next: NextFunction) => {
+  const users = [{ userName: 'Fabricio' }];
+  res.status(200).send({ users });
+});
+ 
+usersRoute.get(
+  '/users/:uuid',
+  (req: Request<{ uuid: String }>, res: Response, next: NextFunction) => {
+    const uuid = req.params.uuid;
+    res.status(200).send({ uuid });
+  }
+);
+ 
+usersRoute.post('/users', (req: Request, res: Response, next: NextFunction) => {
+  const newUser = req.body;
+ 
+  console.log(req.body);
+ 
+  res.status(201).send(newUser);
+});
+ 
+export default usersRoute;
+ 
+
+
+CRIANDO O PUT E O DELETE
+
+PUT
+usersRoute.put('/users/:uuid', (req: Request<{ uuid: String }>, res: Response, next: NextFunction) => {
+  const uuid = req.params.uuid;
+  res.status(200).send({ uuid })
+});
+
+
+usersRoute.put('/users/:uuid', (req: Request<{ uuid: String }>, res: Response, next: NextFunction) => {
+  const uuid = req.params.uuid;
+  const modifieduser = req.body;
+  modifieduser.uuid = uuid;
+  res.status(200).send(modifieduser);
+});
+
+
+DELETE
+
+usersRoute.delete('/users/:uuid', (req: Request<{ uuid: String }>, res: Response, next: NextFunction) => {
+  const uuid = req.params.uuid;
+  res.sendStatus(200);
+})
+
+
+Refatorando a rota de status
+
+Criar um arquivo na pasta routes, status.route.ts
+import { Router, Request, Response, NextFunction } from "express";
+ 
+const statusRoute = Router();
+ 
+statusRoute.get('/status', (req: Request, res: Response, next: NextFunction) => {
+  res.sendStatus(200);
+});
+ 
+export default statusRoute;
+
+mudar no index
+import express, { Request, Response, NextFunction } from 'express';
+import usersRoute from './routes/users.routes';
+import statusRoute from './routes/status.routes';
+ 
+const app = express();
+ 
+app.use(express.json());
+ 
+app.use(usersRoute);
+app.use(statusRoute);
+ 
+ 
+app.listen(3000, () => {
+  console.log('Estou funcionando');
+});
+ 
+
+
+CONFIGURANDO BANCO DE DADOS SQL
+
+https://www.npmjs.com/package/pg
+https://node-postgres.com/
+
+npm install - -save pg
+types da biblioteca pg, para funcionar o auto complite
+npm install - -save-dev @types/pg 
+
+ABRIR UM POOL DE CONEX O
+
+Criar na pasta src um arquivo chamado db.ts
+
+Criando um banco de dados no elephant SQL , serviço online
+https://www.elephantsql.com/
+
+Criar pasta sql dentro do projeto e criar um arquivo init.sql
